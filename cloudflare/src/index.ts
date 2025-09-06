@@ -225,6 +225,36 @@ export default {
             );
         }
 
+        // Function to split long text into chunks
+        function splitIntoChunks(
+            text: string,
+            maxLength: number = 1000,
+        ): string[] {
+            const chunks: string[] = [];
+            let currentChunk = '';
+
+            // Split by sentences to keep context
+            const sentences = text.split(/(?<=[.!?])\s+/);
+
+            for (const sentence of sentences) {
+                if ((currentChunk + sentence).length <= maxLength) {
+                    currentChunk += (currentChunk ? ' ' : '') + sentence;
+                } else {
+                    if (currentChunk) chunks.push(currentChunk);
+                    currentChunk = sentence;
+                }
+            }
+
+            if (currentChunk) chunks.push(currentChunk);
+            return chunks.slice(0, 5); // Limit to 5 chunks
+        }
+
+        // Process the skills field if it's too long
+        const skillsChunks =
+            formData.skills.length > 1000
+                ? splitIntoChunks(formData.skills)
+                : [formData.skills];
+
         const fields = [
             { name: 'Full Name', value: formData.name },
             { name: 'Email Address', value: formData.email },
@@ -232,10 +262,14 @@ export default {
             ...(formData.portfolio
                 ? [{ name: 'Portfolio/Resume', value: formData.portfolio }]
                 : []),
-            {
-                name: 'Why do you want to join the staff team?',
-                value: formData.skills,
-            },
+            // Add skills chunks with proper numbering if multiple chunks
+            ...skillsChunks.map((chunk, index) => ({
+                name:
+                    skillsChunks.length > 1
+                        ? `Why do you want to join the staff team? (Part ${index + 1}/${skillsChunks.length})`
+                        : 'Why do you want to join the staff team?',
+                value: chunk,
+            })),
         ].filter((f) => f.value && f.value.trim().length > 0);
 
         try {
