@@ -1,0 +1,9 @@
+dist/
+build/
+node_modules/
+.wrangler/
+.react-router/
+coverage/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

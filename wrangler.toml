@@ -1,0 +1,10 @@
+name = "volunteer-worker"
+main = "cloudflare/src/index.ts"
+compatibility_date = "2025-09-05"
+
+[[kv_namespaces]]
+binding = "RATE_LIMITS"
+id = "1c58a80dcbb2497b8722cae8e3cc9aab"
+
+[observability.logs]
+enabled = true

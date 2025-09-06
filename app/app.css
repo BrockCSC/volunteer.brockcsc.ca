@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@theme {
+    --font-sans:
+        'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+.arrow-container {
+    display: flex;
+    align-items: center;
+    gap: 0; /* Reduced from 4px to 0 */
+}
+
+.arrow-stem {
+    width: 12px;
+    height: 2px;
+    display: inline-block;
+    margin-left: -2px; /* Added negative margin to pull stem closer to arrow */
+}
+
+.arrow {
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 2px;
+}
+
+.left {
+    transform: rotate(135deg);
+    margin-left: 2px;
+}
+
+/* Add these new styles at the bottom of the file */
+.return-link {
+    position: relative;
+    width: fit-content; /* This will make the container only as wide as its content */
+    display: flex;
+    align-items: center;
+}
+
+.return-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    background-color: white;
+    transition: width 0.2s ease;
+}
+
+.return-link:hover::after {
+    width: 100%;
+    color: white 80%;
+}
+
+.back-link {
+    position: relative;
+    width: fit-content; /* This will make the container only as wide as its content */
+    display: flex;
+    align-items: center;
+}
+
+.back-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    background-color: black;
+    transition: width 0.2s ease;
+}
+
+.back-link:hover::after {
+    width: 100%;
+    color: black 80%;
+}

@@ -1,0 +1,45 @@
+name: Deploy Applications
+
+on:
+    workflow_run:
+        workflows: ['CI']
+        types:
+            - completed
+        branches: [main]
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+jobs:
+    verify-ci:
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        steps:
+            - run: echo "CI passed, proceeding with deployment"
+
+    deploy-pages:
+        needs: [verify-ci]
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: npm
+
+            - run: npm ci
+
+            - run: npm run build
+
+            - uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./build/client
+
+            - id: deployment
+              uses: actions/deploy-pages@v4
