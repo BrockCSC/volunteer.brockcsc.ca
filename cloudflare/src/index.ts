@@ -260,87 +260,119 @@ export default {
         }
 
         // Function to process fields that might need chunking
-        function processField(text: string | undefined, maxChunks: number = 2): string[] {
+        function processField(
+            text: string | undefined,
+            maxChunks: number = 2,
+        ): string[] {
             if (!text) return [];
-            return text.length > 1000 ? splitIntoChunks(text, 1000).slice(0, maxChunks) : [text];
-        };
+            return text.length > 1000
+                ? splitIntoChunks(text, 1000).slice(0, maxChunks)
+                : [text];
+        }
 
         // Process all fields that need chunking
-        const roleSpecificFields: DiscordField[] = [];        // Common fields first
+        const roleSpecificFields: DiscordField[] = []; // Common fields first
         roleSpecificFields.push(
             { name: 'Full Name', value: formData.name },
             { name: 'Email Address', value: formData.email },
-            { name: 'Anticipated Graduation Date', value: formData.year }
+            { name: 'Anticipated Graduation Date', value: formData.year },
         );
 
         // Portfolio for specific roles
-        if (formData.portfolio && (roleTitle === 'Graphic Designer' || roleTitle === 'Web Developer')) {
-            roleSpecificFields.push({ name: 'Portfolio/Resume', value: formData.portfolio });
+        if (
+            formData.portfolio &&
+            (roleTitle === 'Graphic Designer' || roleTitle === 'Web Developer')
+        ) {
+            roleSpecificFields.push({
+                name: 'Portfolio/Resume',
+                value: formData.portfolio,
+            });
         }
-        
+
         // Role-specific fields
         if (roleTitle === 'Graphic Designer') {
             if (formData.designtools) {
-                roleSpecificFields.push({ 
-                    name: 'Design Tools', 
-                    value: formData.designtools 
+                roleSpecificFields.push({
+                    name: 'Design Tools',
+                    value: formData.designtools,
                 });
             }
             if (formData.designproject) {
                 const chunks = processField(formData.designproject);
-                roleSpecificFields.push(...chunks.map((chunk: string, index: number) => ({
-                    name: chunks.length > 1 
-                        ? `Design Project Experience (Part ${index + 1}/${chunks.length})`
-                        : 'Design Project Experience',
-                    value: chunk
-                })));
+                roleSpecificFields.push(
+                    ...chunks.map((chunk: string, index: number) => ({
+                        name:
+                            chunks.length > 1
+                                ? `Design Project Experience (Part ${index + 1}/${chunks.length})`
+                                : 'Design Project Experience',
+                        value: chunk,
+                    })),
+                );
             }
         }
-        
-        if (roleTitle === 'Women in Computer Science Representative' && formData.wcssupport) {
+
+        if (
+            roleTitle === 'Women in Computer Science Representative' &&
+            formData.wcssupport
+        ) {
             const chunks = processField(formData.wcssupport);
-            roleSpecificFields.push(...chunks.map((chunk, index) => ({
-                name: chunks.length > 1 
-                    ? `Initiatives for Underrepresented Groups (Part ${index + 1}/${chunks.length})`
-                    : 'Initiatives for Underrepresented Groups',
-                value: chunk
-            })));
+            roleSpecificFields.push(
+                ...chunks.map((chunk, index) => ({
+                    name:
+                        chunks.length > 1
+                            ? `Initiatives for Underrepresented Groups (Part ${index + 1}/${chunks.length})`
+                            : 'Initiatives for Underrepresented Groups',
+                    value: chunk,
+                })),
+            );
         }
-        
+
         if (roleTitle === 'Web Developer' && formData.wdexperience) {
             const chunks = processField(formData.wdexperience);
-            roleSpecificFields.push(...chunks.map((chunk, index) => ({
-                name: chunks.length > 1 
-                    ? `Development Experience (Part ${index + 1}/${chunks.length})`
-                    : 'Development Experience',
-                value: chunk
-            })));
+            roleSpecificFields.push(
+                ...chunks.map((chunk, index) => ({
+                    name:
+                        chunks.length > 1
+                            ? `Development Experience (Part ${index + 1}/${chunks.length})`
+                            : 'Development Experience',
+                    value: chunk,
+                })),
+            );
         }
-        
+
         if (roleTitle === 'Event Coordinator' && formData.ecorganize) {
             const chunks = processField(formData.ecorganize);
-            roleSpecificFields.push(...chunks.map((chunk, index) => ({
-                name: chunks.length > 1 
-                    ? `Event Planning Organization (Part ${index + 1}/${chunks.length})`
-                    : 'Event Planning Organization',
-                value: chunk
-            })));
+            roleSpecificFields.push(
+                ...chunks.map((chunk, index) => ({
+                    name:
+                        chunks.length > 1
+                            ? `Event Planning Organization (Part ${index + 1}/${chunks.length})`
+                            : 'Event Planning Organization',
+                    value: chunk,
+                })),
+            );
         }
 
         // Common long answer field (up to 6 chunks)
-        const skillsChunks = formData.skills.length > 1000 
-            ? splitIntoChunks(formData.skills, 1000)  // This already limits to 6 chunks
-            : [formData.skills];
+        const skillsChunks =
+            formData.skills.length > 1000
+                ? splitIntoChunks(formData.skills, 1000) // This already limits to 6 chunks
+                : [formData.skills];
 
-        roleSpecificFields.push(...skillsChunks.map((chunk, index) => ({
-            name: skillsChunks.length > 1
-                ? `Why do you want to be part of the Computer Science Club executive team? (Part ${index + 1}/${skillsChunks.length})`
-                : 'Why do you want to be part of the Computer Science Club executive team?',
-            value: chunk,
-        })));
+        roleSpecificFields.push(
+            ...skillsChunks.map((chunk, index) => ({
+                name:
+                    skillsChunks.length > 1
+                        ? `Why do you want to be part of the Computer Science Club executive team? (Part ${index + 1}/${skillsChunks.length})`
+                        : 'Why do you want to be part of the Computer Science Club executive team?',
+                value: chunk,
+            })),
+        );
 
         // Filter out any empty fields
-        const fields = roleSpecificFields.filter((f) => f.value && f.value.trim().length > 0);
+        const fields = roleSpecificFields.filter(
+            (f) => f.value && f.value.trim().length > 0,
+        );
 
         try {
             if (!env.DISCORD_WEBHOOK_URL) {
