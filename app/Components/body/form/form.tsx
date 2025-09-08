@@ -20,6 +20,11 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
         email: '',
         year: '',
         portfolio: '',
+        designtool: '',
+        designproject: '',
+        wcssupport: '',
+        wdexperience: '',
+        ecorganize: '',
         skills: '',
     });
     const [errors, setErrors] = useState({
@@ -27,6 +32,11 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
         email: '',
         year: '',
         portfolio: '',
+        designtool: '',
+        designproject: '',
+        wcssupport: '',
+        wdexperience: '',
+        ecorganize: '',
         skills: '',
     });
     const [invalidSubmission, setInvalidSubmission] = useState(false);
@@ -249,10 +259,72 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                             handleChange={handleChange}
                         />
                     )}
+                    {selectedJob == 0 && (
+                        <>
+                            <Field
+                                isRequired={true}
+                                question="What design tools are you most comfortable using?"
+                                id="designtools"
+                                error={errors.designtool}
+                                value={formData.designtool}
+                                placeholder="Figma, Canva, Photoshop"
+                                handleChange={handleChange}
+                            />
+                            <Field
+                                isRequired={true}
+                                isLong={true}
+                                question="Tell us about a design project you've worked on."
+                                hint="What was your goal, and how did your design choices achieve it?"
+                                id="designproject"
+                                error={errors.designproject}
+                                value={formData.designproject}
+                                placeholder="Enter your response here"
+                                handleChange={handleChange}
+                            />
+                        </>
+                    )}
+                    {selectedJob == 1 && (
+                        <Field
+                            isRequired={true}
+                            isLong={true}
+                            question="What initiatives would you start (or continue) to support underrepresented groups in Computer Science?"
+                            id="wcssupport"
+                            error={errors.wcssupport}
+                            value={formData.wcssupport}
+                            placeholder="Enter your response here"
+                            handleChange={handleChange}
+                        />
+                    )}
+                    {selectedJob == 2 && (
+                        <Field
+                            isRequired={true}
+                            isLong={true}
+                            question="Describe any past software development experience, that equip you for this position."
+                            hint="ex: Academic Projects, Work Experience, etc."
+                            id="wdexperience"
+                            error={errors.wdexperience}
+                            value={formData.wdexperience}
+                            placeholder="Enter your response here"
+                            handleChange={handleChange}
+                        />
+                    )}
+                    {selectedJob == 3 && (
+                        <Field
+                            isRequired={true}
+                            isLong={true}
+                            question="How would you stay organized when planning an event with many components?"
+                            hint="ex: booking space, food, marketing, volunteers"
+                            id="ecorganize"
+                            error={errors.ecorganize}
+                            value={formData.ecorganize}
+                            placeholder="Enter your response here"
+                            handleChange={handleChange}
+                        />
+                    )}
                     <Field
                         isRequired={true}
                         isLong={true}
-                        question="Why do you want to join the staff team?"
+                        question="Why do you want to be part of the Computer Science Club executive team?"
                         id="skills"
                         error={errors.skills}
                         value={formData.skills}
