@@ -19,6 +19,11 @@ export type formFields = {
     email: string;
     year: string;
     portfolio: string;
+    designtool: string;
+    designproject: string;
+    wcssupport: string;
+    wdexperience: string;
+    ecorganize: string;
     skills: string;
 };
 
