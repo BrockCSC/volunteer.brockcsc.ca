@@ -246,7 +246,7 @@ export default {
             }
 
             if (currentChunk) chunks.push(currentChunk);
-            return chunks.slice(0, 5); // Limit to 5 chunks
+            return chunks.slice(0, 6); // Limit to 6 chunks
         }
 
         // Process the skills field if it's too long
