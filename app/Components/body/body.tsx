@@ -10,9 +10,9 @@ export default function Body() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const checkStatus = async () => {
+        const checkStatus = () => {
             try {
-                const isClosed = await checkApplicationStatus();
+                const isClosed = checkApplicationStatus();
                 setApplicationsClosed(isClosed);
             } catch (error) {
                 console.error('Failed to check application status:', error);

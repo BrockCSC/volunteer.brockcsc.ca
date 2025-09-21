@@ -4,7 +4,7 @@ const WORKER_URL = import.meta.env.DEV
     ? 'http://127.0.0.1:8787' // Calls local worker if in dev env (use 'npx run dev') to run a local worker
     : 'https://volunteer-worker.brockcsc.workers.dev';
 
-export const checkApplicationStatus = async (): Promise<boolean> => {
+export const checkApplicationStatus = (): boolean => {
     try {
         // Check if applications are closed (after midnight September 22, 2025)
         const now = new Date();
