@@ -113,6 +113,28 @@ export default {
             });
         }
 
+        // Check if applications are closed (after midnight September 22, 2025)
+        const now = new Date();
+        const cutoffDate = new Date('2025-09-22T00:00:00-04:00'); // Midnight EDT (Toronto timezone)
+
+        if (now >= cutoffDate) {
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    message: 'Application period has ended',
+                    closed: true,
+                }),
+                {
+                    status: 410, // Gone - indicates the resource is no longer available
+                    headers: {
+                        ...SECURITY_HEADERS,
+                        'Content-Type': 'application/json',
+                        ...corsHeaders,
+                    },
+                },
+            );
+        }
+
         // Get client IP
         const clientIP = request.headers.get('CF-Connecting-IP') || '';
 
