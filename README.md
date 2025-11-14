@@ -31,8 +31,6 @@ Think of it as a **beautiful, single‑page volunteer brochure**: visitors land 
 
 ## 🖼 Visual Overview
 
-
-
 ### Home / Landing Page
 
 - **Topbar** with the BrockCSC logo or name and navigation.
@@ -165,21 +163,21 @@ npm run start
 
 1. Install Wrangler if you haven’t:
 
-	```bash
-	npm install -g wrangler
-	```
+    ```bash
+    npm install -g wrangler
+    ```
 
 2. Configure your Cloudflare account:
 
-	```bash
-	wrangler login
-	```
+    ```bash
+    wrangler login
+    ```
 
 3. Deploy:
 
-	```bash
-	wrangler deploy
-	```
+    ```bash
+    wrangler deploy
+    ```
 
 Adjust settings in `wrangler.toml` as needed (routes, account id, etc.).
 
@@ -213,11 +211,11 @@ To replace the placeholder image references in this README:
 
 1. Run the app locally: `npm run dev`.
 2. Open the site in your browser and take screenshots of:
-	- The full home page (topbar + roles).
-	- A close‑up of the role cards.
+    - The full home page (topbar + roles).
+    - A close‑up of the role cards.
 3. Save them under `public/screenshots/`, for example:
-	- `public/screenshots/home-hero-and-roles.png`
-	- `public/screenshots/home-role-cards.png`
+    - `public/screenshots/home-hero-and-roles.png`
+    - `public/screenshots/home-role-cards.png`
 4. Commit the images and verify they render on GitHub.
 
 ---
@@ -225,4 +223,3 @@ To replace the placeholder image references in this README:
 ## 📄 License
 
 This project is maintained by the **Brock Computer Science Club**. If you’d like to reuse or adapt this project for your own student organization, please open an issue or reach out to the maintainers.
-
