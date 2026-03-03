@@ -249,6 +249,19 @@ export default {
             );
         }
 
+        if (!formData.email.trim().toLowerCase().endsWith('@brocku.ca')) {
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    message: 'Email must be a Brock University address',
+                }),
+                {
+                    status: 400,
+                    headers: responseHeaders,
+                },
+            );
+        }
+
         const fields: DiscordField[] = [
             { name: 'Full Name', value: formData.name },
             { name: 'Discord Username', value: formData.discord },

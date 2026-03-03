@@ -39,8 +39,8 @@ export default function Form() {
             validators: [
                 {
                     test: (value: string) =>
-                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-                    message: 'Please enter a valid email address',
+                        value.trim().toLowerCase().endsWith('@brocku.ca'),
+                    message: 'Must use a Brock University email (@brocku.ca)',
                 },
             ],
         },
