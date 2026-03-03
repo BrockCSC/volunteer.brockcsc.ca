@@ -6,9 +6,9 @@ const WORKER_URL = import.meta.env.DEV
 
 export const checkApplicationStatus = (): boolean => {
     try {
-        // Check if applications are closed (after midnight September 22, 2025)
+        // Check if applications are closed (after midnight September 22, 2026)
         const now = new Date();
-        const cutoffDate = new Date('2025-09-22T00:00:00-04:00'); // Midnight EDT (Toronto timezone)
+        const cutoffDate = new Date('2026-05-22T00:00:00-04:00'); // Midnight EDT (Toronto timezone)
 
         return now >= cutoffDate;
     } catch (error) {
@@ -17,10 +17,7 @@ export const checkApplicationStatus = (): boolean => {
     }
 };
 
-export const sendApplication = async (
-    formData: formFields,
-    roleTitle: string,
-) => {
+export const sendApplication = async (formData: formFields) => {
     try {
         const response = await fetch(WORKER_URL, {
             method: 'POST',
@@ -29,7 +26,6 @@ export const sendApplication = async (
             },
             body: JSON.stringify({
                 formData,
-                roleTitle,
             }),
         });
 

@@ -3,10 +3,11 @@ import Roles from '../Components/body/body';
 
 export function meta() {
     return [
-        { title: 'Volunteer at BrockCSC' },
+        { title: 'BrockCSC Exec Recruitment' },
         {
             name: 'description',
-            content: 'We are excited to have you join the BrockCSC staff team!',
+            content:
+                'Recruitment outreach form for prospective BrockCSC executive members.',
         },
     ];
 }

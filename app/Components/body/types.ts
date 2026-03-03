@@ -16,15 +16,9 @@ export type JobListProp = {
 
 export type formFields = {
     name: string;
+    discord: string;
     email: string;
     year: string;
-    portfolio: string;
-    designtool: string;
-    designproject: string;
-    wcssupport: string;
-    wdexperience: string;
-    ecorganize: string;
-    skills: string;
 };
 
 export type formValidation = {
@@ -41,5 +35,7 @@ export type FieldProp = {
     error?: string;
     hint?: string;
     value?: string;
-    handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+    handleChange: ChangeEventHandler<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >;
 };

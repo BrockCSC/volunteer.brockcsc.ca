@@ -1,43 +1,24 @@
-import type { formFields, JobListProp } from '../types';
+import type { formFields } from '../types';
 
-import { RoleConfig } from '../config';
 import Field from './field';
 import { sendApplication } from '~/Components/send';
 import { FIELD_LIMITS } from './formConfig';
-import {
-    useState,
-    type ChangeEventHandler,
-    type Dispatch,
-    type SetStateAction,
-} from 'react';
+import { useState, type ChangeEventHandler } from 'react';
 
-export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
-    const [formData, setFormData]: [
-        formFields,
-        Dispatch<SetStateAction<formFields>>,
-    ] = useState({
+const YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+
+export default function Form() {
+    const [formData, setFormData] = useState<formFields>({
         name: '',
+        discord: '',
         email: '',
         year: '',
-        portfolio: '',
-        designtool: '',
-        designproject: '',
-        wcssupport: '',
-        wdexperience: '',
-        ecorganize: '',
-        skills: '',
     });
     const [errors, setErrors] = useState({
         name: '',
+        discord: '',
         email: '',
         year: '',
-        portfolio: '',
-        designtool: '',
-        designproject: '',
-        wcssupport: '',
-        wdexperience: '',
-        ecorganize: '',
-        skills: '',
     });
     const [invalidSubmission, setInvalidSubmission] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,55 +29,52 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
             required: true,
             message: 'Name is required',
         },
+        discord: {
+            required: true,
+            message: 'Discord username is required',
+        },
         email: {
             required: true,
             message: 'Email is required',
             validators: [
                 {
                     test: (value: string) =>
-                        value.toLowerCase().endsWith('@brocku.ca'),
-                    message:
-                        'Must use a Brock University email (******@brocku.ca)',
+                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+                    message: 'Please enter a valid email address',
                 },
             ],
         },
         year: {
             required: true,
-            message: 'This field is required',
-        },
-        portfolio: {
-            required: true,
-            message: 'This field is required',
-            selector: [0, 2],
-        },
-        skills: {
-            required: true,
-            message: 'This field is required',
+            message: 'Year is required',
+            validators: [
+                {
+                    test: (value: string) => YEAR_OPTIONS.includes(value),
+                    message: 'Please select a valid year',
+                },
+            ],
         },
     };
 
-    const validateField = (name: string, value: string) => {
-        const rules = (validationRules as any)[name];
+    const validateField = (name: string, value: string): string => {
+        const rules = (validationRules as Record<string, any>)[name];
 
-        if (
-            !rules ||
-            (rules.selector && !rules.selector.includes(selectedJob))
-        ) {
+        if (!rules) {
             setErrors((prev) => ({
                 ...prev,
                 [name]: '',
             }));
-            return;
+            return '';
         }
 
-        // Check character limits first
         if (isOverLimit(name, value)) {
             const limit = FIELD_LIMITS[name as keyof typeof FIELD_LIMITS]?.max;
+            const message = `Maximum ${limit} characters allowed`;
             setErrors((prev) => ({
                 ...prev,
-                [name]: `Maximum ${limit} characters allowed`,
+                [name]: message,
             }));
-            return;
+            return message;
         }
 
         if (rules.required && !value.trim()) {
@@ -104,7 +82,7 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                 ...prev,
                 [name]: rules.message,
             }));
-            return;
+            return rules.message;
         }
 
         if (rules.validators && value.trim()) {
@@ -114,7 +92,7 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                         ...prev,
                         [name]: validator.message,
                     }));
-                    return;
+                    return validator.message;
                 }
             }
         }
@@ -123,19 +101,22 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
             ...prev,
             [name]: '',
         }));
+        return '';
     };
 
-    const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const handleChange: ChangeEventHandler<
+        HTMLInputElement | HTMLSelectElement
+    > = (event) => {
         const { name, value } = event.target;
-        validateField(name, value);
 
         setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
+
+        validateField(name, value);
     };
 
-    // Check if any field exceeds its character limit
     const isOverLimit = (field: string, value: string): boolean => {
         const limit = FIELD_LIMITS[field as keyof typeof FIELD_LIMITS]?.max;
         return limit ? value.length > limit : false;
@@ -143,32 +124,13 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
 
     async function handleSubmit() {
         if (isSubmitting) return;
-        var isValid: boolean = true;
 
-        // Check character limits first
+        let isValid = true;
+
         for (const [field, value] of Object.entries(formData)) {
-            if (isOverLimit(field, value)) {
-                const limit =
-                    FIELD_LIMITS[field as keyof typeof FIELD_LIMITS]?.max;
-                setErrors((prev) => ({
-                    ...prev,
-                    [field]: `Maximum ${limit} characters allowed`,
-                }));
+            const error = validateField(field, value);
+            if (error) {
                 isValid = false;
-            }
-        }
-
-        // Only proceed with other validations if character limits are okay
-        if (isValid) {
-            for (const [key, value] of Object.entries(formData)) {
-                validateField(key, value);
-            }
-
-            for (const value of Object.values(errors)) {
-                if (value) {
-                    isValid = false;
-                    break;
-                }
             }
         }
 
@@ -177,49 +139,31 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
             return;
         }
 
-        // Batch state updates before submission
         setInvalidSubmission(false);
         setIsSubmitting(true);
         setSubmissionStatus(-1);
 
         try {
-            await sendApplication(formData, RoleConfig[selectedJob].title);
-            // Batch state updates after success
-            Promise.resolve().then(() => {
-                setIsSubmitting(false);
-                setSubmissionStatus(1);
-            });
-        } catch (err) {
-            // Batch state updates after failure
-            Promise.resolve().then(() => {
-                setIsSubmitting(false);
-                setSubmissionStatus(0);
-            });
+            await sendApplication(formData);
+            setSubmissionStatus(1);
+        } catch {
+            setSubmissionStatus(0);
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
     return (
         <div className="p-10">
-            <button
-                className="flex flex-1 gap-2 transition duration-200 hover:opacity-80 back-link cursor-pointer mb-10"
-                onClick={() => {
-                    setSelectedJob(-1);
-                    setSubmissionStatus(-1);
-                    setIsSubmitting(false);
-                }}
-            >
-                <div className="arrow-container">
-                    <i className="arrow left"></i>
-                    <span className="arrow-stem bg-black"></span>
-                </div>
-                <span>Back</span>
-            </button>
-
-            {submissionStatus == -1 ? (
+            {submissionStatus === -1 ? (
                 <div className="flex flex-col justify-center items-center">
-                    <div className="flex-1 font-bold text-2xl">
-                        {RoleConfig[selectedJob].title}
+                    <div className="flex-1 font-bold text-2xl text-center">
+                        BrockCSC Exec Recruitment
                     </div>
+                    <p className="text-sm text-gray-600 mt-2 text-center">
+                        Share your details and we will follow up.
+                    </p>
+
                     <Field
                         isRequired={true}
                         question="Full Name"
@@ -231,137 +175,54 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                     />
                     <Field
                         isRequired={true}
+                        question="Discord Username"
+                        id="discord"
+                        error={errors.discord}
+                        value={formData.discord}
+                        placeholder="username"
+                        handleChange={handleChange}
+                    />
+                    <Field
+                        isRequired={true}
                         question="Email Address"
                         id="email"
                         error={errors.email}
                         value={formData.email}
-                        placeholder="Enter your Brock Email Address (******@brocku.ca)"
+                        placeholder="Enter your email address"
                         handleChange={handleChange}
                     />
-                    <Field
-                        isRequired={true}
-                        question="Anticipated Graduation Date"
-                        id="year"
-                        error={errors.year}
-                        value={formData.year}
-                        placeholder="Term and year (Fall 2027)"
-                        handleChange={handleChange}
-                    />
-                    {(selectedJob == 0 || selectedJob == 2) && (
-                        <Field
-                            isRequired={true}
-                            question="Portfolio/Resume"
-                            id="portfolio"
-                            error={errors.portfolio}
-                            value={formData.portfolio}
-                            hint="Upload documents to Google Drive and share a link here (Ensure everyone with link can view)"
-                            placeholder="Enter your response here"
-                            handleChange={handleChange}
-                        />
-                    )}
-                    {selectedJob == 0 && (
-                        <>
-                            <Field
-                                isRequired={true}
-                                question="What design tools are you most comfortable using?"
-                                id="designtools"
-                                error={errors.designtool}
-                                value={formData.designtool}
-                                placeholder="Figma, Canva, Photoshop"
-                                handleChange={handleChange}
-                            />
-                            <Field
-                                isRequired={true}
-                                isLong={true}
-                                question="Tell us about a design project you've worked on."
-                                hint="What was your goal, and how did your design choices achieve it?"
-                                id="designproject"
-                                error={errors.designproject}
-                                value={formData.designproject}
-                                placeholder="Enter your response here"
-                                handleChange={handleChange}
-                            />
-                        </>
-                    )}
-                    {selectedJob == 1 && (
-                        <Field
-                            isRequired={true}
-                            isLong={true}
-                            question="What initiatives would you start (or continue) to support underrepresented groups in Computer Science?"
-                            id="wcssupport"
-                            error={errors.wcssupport}
-                            value={formData.wcssupport}
-                            placeholder="Enter your response here"
-                            handleChange={handleChange}
-                        />
-                    )}
-                    {selectedJob == 2 && (
-                        <Field
-                            isRequired={true}
-                            isLong={true}
-                            question="Describe any past software development experience, that equip you for this position."
-                            hint="ex: Academic Projects, Work Experience, etc."
-                            id="wdexperience"
-                            error={errors.wdexperience}
-                            value={formData.wdexperience}
-                            placeholder="Enter your response here"
-                            handleChange={handleChange}
-                        />
-                    )}
-                    {selectedJob == 3 && (
-                        <Field
-                            isRequired={true}
-                            isLong={true}
-                            question="How would you stay organized when planning an event with many components?"
-                            hint="ex: booking space, food, marketing, volunteers"
-                            id="ecorganize"
-                            error={errors.ecorganize}
-                            value={formData.ecorganize}
-                            placeholder="Enter your response here"
-                            handleChange={handleChange}
-                        />
-                    )}
-                    <Field
-                        isRequired={true}
-                        isLong={true}
-                        question="Why do you want to be part of the Computer Science Club executive team?"
-                        id="skills"
-                        error={errors.skills}
-                        value={formData.skills}
-                        placeholder="Enter your response here"
-                        handleChange={handleChange}
-                    />
+
+                    <div className="flex flex-col items-left w-full mt-5 max-w-xl">
+                        <label htmlFor="year" className="font-bold">
+                            Year*
+                        </label>
+                        <select
+                            id="year"
+                            name="year"
+                            value={formData.year}
+                            onChange={handleChange}
+                            className={`border rounded-md p-2 mt-2 bg-white ${errors.year ? 'outline-red-600 border-red-600' : ''}`}
+                        >
+                            <option value="">Select your year</option>
+                            {YEAR_OPTIONS.map((option) => (
+                                <option key={option} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.year && (
+                            <p className="text-[#e32222] text-xs">
+                                {errors.year}
+                            </p>
+                        )}
+                    </div>
+
                     <button
                         type="submit"
                         className={`mt-5 hover:bg-[#8B0000] bg-[#aa3b3b] rounded-md text-white py-2 px-10 ${isSubmitting ? 'cursor-not-allowed' : 'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#aa3b3b] cursor-pointer'}`}
                         onClick={handleSubmit}
                     >
-                        {isSubmitting ? (
-                            <div className="flex items-center">
-                                <svg
-                                    className="animate-spin ml-3 mr-3 h-6 w-6 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        className="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                        className="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
-                                </svg>
-                            </div>
-                        ) : (
-                            'Apply'
-                        )}
+                        {isSubmitting ? 'Submitting...' : 'Submit'}
                     </button>
                     {invalidSubmission && (
                         <p className="text-[#e32222] text-xs mt-2">
@@ -371,7 +232,7 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                 </div>
             ) : (
                 <div>
-                    {submissionStatus == 1 ? (
+                    {submissionStatus === 1 ? (
                         <div className="flex flex-col items-center justify-center">
                             <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <svg
@@ -391,10 +252,6 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                             <div className="text-2xl font-bold text-gray-900">
                                 Successfully Submitted
                             </div>
-                            <p className="text-xs text-gray-500">
-                                Hint: We recommend printing this page to retain
-                                a copy of your responses.
-                            </p>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center">
@@ -414,18 +271,17 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                                 </svg>
                             </div>
                             <div className="text-2xl font-bold text-gray-900">
-                                Failed to Submit!
+                                Failed to Submit
                             </div>
-                            <p className="text-xs text-gray-900">
-                                Hint: Print this page to retain your responses
-                                AND try resubmitting this application later, or
-                                contact{' '}
+                            <p className="text-xs text-gray-900 text-center">
+                                Please try again later or contact{' '}
                                 <a
                                     className="text-blue-600 underline cursor-pointer hover:text-blue-800"
                                     href="mailto:admin@brockcsc.ca"
                                 >
                                     admin@brockcsc.ca
                                 </a>
+                                .
                             </p>
                         </div>
                     )}
@@ -434,13 +290,15 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                     <div className="text-xl text-center font-bold text-gray-900 mt-5">
                         Your Responses
                     </div>
-
-                    <p className="text-lg text-center mt-2 font-semibold">
-                        {RoleConfig[selectedJob].title}
-                    </p>
                     <div className="mt-2">
                         <p className="text-lg mt-2 font-semibold">Full Name</p>
                         <p>{formData.name}</p>
+                    </div>
+                    <div className="mt-2">
+                        <p className="text-lg mt-2 font-semibold">
+                            Discord Username
+                        </p>
+                        <p>{formData.discord}</p>
                     </div>
                     <div className="mt-2">
                         <p className="text-lg mt-2 font-semibold">
@@ -448,25 +306,9 @@ export default function Form({ selectedJob, setSelectedJob }: JobListProp) {
                         </p>
                         <p>{formData.email}</p>
                     </div>
-                    {formData.portfolio && (
-                        <div className="mt-2">
-                            <p className="text-lg font-semibold">
-                                Anticipated Graduation Date
-                            </p>
-                            <p>{formData.portfolio}</p>
-                        </div>
-                    )}
                     <div className="mt-2">
-                        <p className="text-lg mt-2 font-semibold">
-                            Anticipated Graduation Date
-                        </p>
+                        <p className="text-lg mt-2 font-semibold">Year</p>
                         <p>{formData.year}</p>
-                    </div>
-                    <div className="mt-2">
-                        <p className="text-lg mt-2 font-semibold">
-                            Why do you want to join the staff team?
-                        </p>
-                        <p>{formData.skills}</p>
                     </div>
                 </div>
             )}
